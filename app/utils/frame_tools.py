@@ -6,12 +6,33 @@ from utils.pdf_tools import pdf_to_csv
 df = pd.DataFrame()
 type_buy = {}
 name_buy = {}
+organizations = []
 
 
 def extract_english_words(text):
     words = re.findall(r"[A-Za-z.\-]+", text)
     return ' '.join(words) if words else None
 
+def load_buyInfo():
+    with open('data/base/type_buy.txt') as file:
+        for line in file:
+            organization, type, name = line.strip().split(':')
+            type_buy[organization] = type
+            name_buy[organization] = name
+            organizations.append(organization)
+
+def add_buyInfo(organization, type, name):
+    type_buy[organization] = type
+    name_buy[organization] = name
+    organizations.append(organization)
+
+def save_buyInfo():
+    text = ''
+    for organization in organizations:
+        type, name = type_buy[organization], name_buy[organization]
+        text += organization+':'+type+':'+name+'\n'
+    with open('data/base/type_buy.txt', 'w') as file:
+        file.write(text[:-1])
 
 def init_dataFrame():
     global df
@@ -23,11 +44,8 @@ def init_dataFrame():
     df[['operation', 'type', 'describe']] = df['operation'].apply(lambda x: pd.Series(typizer(x)))
 
 def init_csv():
-    global type_buy
     try:
-        with open('data/base/type_buy.txt') as file:
-            for line in file:
-                temp = line.strip().split(':')
+        load_buyInfo()
         try:
             init_dataFrame()
         except FileNotFoundError:
@@ -38,19 +56,30 @@ def init_csv():
             print('[INFO] Initialization DataFrame from CSV document')
         
     except Exception as e:
-        print("[ERROR] Cannot open CSV")
-        print(e)
+        print("[ERROR]", e)
+
+
+def find_info(name):
+    if name in organizations:
+        return type_buy[name], name_buy[name]
+    else:
+        return 'none', name
 
 
 def typizer(operation):
-    global type_buy
-
     name, type, describe = "unknown", "none", ""
 
     if 'Оплата' in operation:
-        name = extract_english_words(operation)
-        if name in type_buy.keys():
-            type = type_buy[name]
+        if 'QR' in operation:
+            if operation.count('(') == 1:
+                name = operation[ operation.find('(')+1 : operation.find(')') ].strip()
+            elif operation.count('(') == 2:
+                name = operation[ operation.find('(')+1 : operation.rfind('(') ].strip()
+            name = name.replace('_P_QR', '')
+            type, name = find_info(name)
+        else:
+            name = extract_english_words(operation)
+            type, name = find_info(name)
     elif 'перевод' in operation:
         operation = list(operation.split(', '))
         name = operation[1]
@@ -59,6 +88,9 @@ def typizer(operation):
     elif 'Перевод между' in operation:
         name = 'Перевод между счетами'
         type = 'transfer'
+    elif 'Возврат средств СБП QR (Сервисы Яндекса)' in operation:
+        name = 'Возврат Сервисы Яндекса'
+        type = 'return'
     else:
         name = operation
 
@@ -84,4 +116,5 @@ def filter_price(start_date=None, end_date=None, sign='+'):
     filtered_df = filtered_df.sort_values(by='price', key=lambda x: x.abs(), ascending=False)
     
     return filtered_df.to_dict(orient='records'), filtered_df['price'].sum()
+
 init_csv()
