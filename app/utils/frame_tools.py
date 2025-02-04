@@ -1,22 +1,42 @@
 import pandas as pd
 from datetime import datetime
+import re
+from utils.pdf_tools import pdf_to_csv
 
 df = pd.DataFrame()
 type_buy = {}
+name_buy = {}
+
+
+def extract_english_words(text):
+    words = re.findall(r"[A-Za-z.\-]+", text)
+    return ' '.join(words) if words else None
+
+
+def init_dataFrame():
+    global df
+    df = pd.read_csv('data/base/output.csv')
+    df = df.iloc[:, 1:]
+    df['price'] = df['price'].astype(float)
+    df['datetime'] = pd.to_datetime(df['datetime'], format='%d.%m.%Y %H:%M', errors='coerce')
+    
+    df[['operation', 'type', 'describe']] = df['operation'].apply(lambda x: pd.Series(typizer(x)))
 
 def init_csv():
-    global df, type_buy
+    global type_buy
     try:
-        df = pd.read_csv('data/base/output.csv')
-        df = df.iloc[:, 1:]
-        df['price'] = df['price'].astype(float)
-        df['datetime'] = pd.to_datetime(df['datetime'], format='%d.%m.%Y %H:%M', errors='coerce')
-                
-        df['type'] = 'other'
-
-        print(df.head())
         with open('data/base/type_buy.txt') as file:
-            type_buy = dict([list(i.split(':')) for i in  file.read().split('\n')])
+            for line in file:
+                temp = line.strip().split(':')
+        try:
+            init_dataFrame()
+        except FileNotFoundError:
+            print('[LOAD] Create CSV document from extract PDF')
+            pdf_to_csv()
+            print("[INFO] Success create!")
+            init_dataFrame()
+            print('[INFO] Initialization DataFrame from CSV document')
+        
     except Exception as e:
         print("[ERROR] Cannot open CSV")
         print(e)
@@ -25,13 +45,24 @@ def init_csv():
 def typizer(operation):
     global type_buy
 
+    name, type, describe = "unknown", "none", ""
+
     if 'Оплата' in operation:
-        pass
+        name = extract_english_words(operation)
+        if name in type_buy.keys():
+            type = type_buy[name]
     elif 'перевод' in operation:
-        pass
+        operation = list(operation.split(', '))
+        name = operation[1]
+        type = 'transfer'
+        describe = operation[-1]
     elif 'Перевод между' in operation:
-        pass
-    
+        name = 'Перевод между счетами'
+        type = 'transfer'
+    else:
+        name = operation
+
+    return name, type, describe
 
 
 def filter_price(start_date=None, end_date=None, sign='+'):

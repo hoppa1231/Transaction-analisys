@@ -3,7 +3,7 @@ import pandas as pd
 
 
 data_base = {
-    'name' : [],
+    'operation' : [],
     'datetime' : [],
     'price' : []
 }
@@ -32,14 +32,14 @@ def table_in_text(text):
         else:
             date_cord = operation[-2].rfind('.')
             datetime = operation[-2][ date_cord-5 : ] + ' ' + operation[-1][ time_cord-2 : time_cord+3]
-            name = ' '.join(operation[ : -2]) + operation[-2][:date_cord-5]
+            name = (' '.join(operation[ : -2]) + ' ' + operation[-2][:date_cord-5]).replace('  ', ' ')
 
         name = name.strip()
         datetime = datetime.strip()
         price = price.strip()
 
         if name == datetime == price: continue
-        data_base['name'].append(name)
+        data_base['operation'].append(name)
         data_base['datetime'].append(datetime)
         data_base['price'].append(price)
 

@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template
-from utils.frame_tools import filter_price, init_csv
+from utils.frame_tools import filter_price
 
 app = Flask(__name__)
 
@@ -15,8 +15,6 @@ def operation():
     sign = data.get('sign')
 
     operations_list, total = filter_price(start_date, end_date, sign)
-    print(total)
-    print(operations_list)
 
     operation_dict = {'operations': operations_list, 'total': total}
     return jsonify(operation_dict)
