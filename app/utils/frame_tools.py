@@ -2,6 +2,7 @@ import pandas as pd
 from datetime import datetime
 import re
 from utils.pdf_tools import pdf_to_csv
+from utils import BASE_DIR
 
 df = pd.DataFrame()
 type_buy = {}
@@ -14,7 +15,7 @@ def extract_english_words(text):
     return ' '.join(words) if words else None
 
 def load_buyInfo():
-    with open('data/base/type_buy.txt') as file:
+    with open(BASE_DIR + '/data/base/type_buy.txt') as file:
         for line in file:
             organization, type, name = line.strip().split(':')
             type_buy[organization] = type
@@ -31,12 +32,12 @@ def save_buyInfo():
     for organization in organizations:
         type, name = type_buy[organization], name_buy[organization]
         text += organization+':'+type+':'+name+'\n'
-    with open('data/base/type_buy.txt', 'w') as file:
+    with open(BASE_DIR + '/data/base/type_buy.txt', 'w') as file:
         file.write(text[:-1])
 
 def init_dataFrame():
     global df
-    df = pd.read_csv('data/base/output.csv')
+    df = pd.read_csv(BASE_DIR + '/data/base/output.csv')
     df = df.iloc[:, 1:]
     df['price'] = df['price'].astype(float)
     df['datetime'] = pd.to_datetime(df['datetime'], format='%d.%m.%Y %H:%M', errors='coerce')

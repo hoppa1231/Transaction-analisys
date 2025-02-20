@@ -1,5 +1,6 @@
 import PyPDF2
 import pandas as pd
+from utils import BASE_DIR
 
 
 data_base = {
@@ -54,6 +55,7 @@ def extract_text_from_pdf(pdf_path):
                 table_in_text(text)
 
 def pdf_to_csv(filename='input.pdf'):
-    extract_text_from_pdf('data/pdf/' + filename)
+    global BASE_DIR
+    extract_text_from_pdf(BASE_DIR + '/data/pdf/' + filename)
     df = pd.DataFrame(data_base)
-    df.to_csv('data/base/output.csv')
+    df.to_csv(BASE_DIR + '/data/base/output.csv')
