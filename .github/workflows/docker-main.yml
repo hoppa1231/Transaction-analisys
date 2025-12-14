@@ -6,15 +6,10 @@ on:
   pull_request:
     branches: [main, master]
   workflow_dispatch:
-    inputs:
-      env:
-        type: choice
-        options: [docker, server]
-        required: true
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.env }}
+    environment: docker
     env:
       IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/transaction-analisys
 
