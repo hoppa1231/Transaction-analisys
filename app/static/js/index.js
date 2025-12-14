@@ -30,12 +30,19 @@ const sectionCount = colors.length;
 
 function resizeChartToContainer() {
   const container = document.querySelector(".chart-pie");
-  const maxSize = 460;
-  const minSize = 240;
-  const containerWidth = container ? container.clientWidth : maxSize;
-  const size = Math.max(minSize, Math.min(maxSize, containerWidth));
-  canvas.width = size;
-  canvas.height = size;
+  const maxSize = 380;
+  const minSize = 180;
+  const containerWidth = container ? container.getBoundingClientRect().width : maxSize;
+  let size = Math.max(minSize, Math.min(maxSize, containerWidth));
+  const dpr = window.devicePixelRatio || 1;
+
+  canvas.style.width = `${size}px`;
+  canvas.style.height = `${size}px`;
+  canvas.width = Math.round(size * dpr);
+  canvas.height = Math.round(size * dpr);
+
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
   centerX = size / 2;
   centerY = size / 2;
   outerRadius = size * 0.48;
@@ -83,6 +90,7 @@ function setUploadStatus(message, isError = false) {
   uploadStatus.textContent = message || "";
   uploadStatus.classList.toggle("error", Boolean(isError));
   uploadStatus.classList.toggle("success", Boolean(!isError && message));
+  uploadStatus.style.display = message ? "inline" : "none";
 }
 
 function populateList(data) {
