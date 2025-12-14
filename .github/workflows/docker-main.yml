@@ -2,9 +2,7 @@ name: Build and Publish Transaction Analisys
 
 on:
   push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
+    branches: [main]
   workflow_dispatch:
 jobs:
   build-and-publish:
@@ -39,6 +37,7 @@ jobs:
           cache-to: type=gha,mode=max
   deploy:
       needs: build-and-publish
+      environment: server
       runs-on: ubuntu-latest
       steps:
         - name: Deploy on Swarm manager via SSH
