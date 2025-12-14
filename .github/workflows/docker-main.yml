@@ -6,10 +6,15 @@ on:
   pull_request:
     branches: [main, master]
   workflow_dispatch:
+    inputs:
+      env:
+        type: choice
+        options: [docker, server]
+        required: true
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
-    environment: docker, server
+    environment: ${{ inputs.env }}
     env:
       IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/transaction-analisys
 
@@ -42,12 +47,13 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - name: Deploy on Swarm manager via SSH
-          uses: easingthemes/ssh-deploy@main
+          uses: appleboy/ssh-action@v1.1.0
           with:
-            REMOTE_HOST: 185.244.172.177
-            REMOTE_USER: ${{ secrets.SSH_USER }}
-            SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
-            SCRIPT_AFTER: |
+            host: ${{ secrets.SSH_HOST }}
+            username: ${{ secrets.SSH_USER }}
+            key: ${{ secrets.SSH_KEY }}
+            port: ${{ secrets.SSH_PORT || 22 }}
+            script: |
               cd /root/Swarm
               docker pull maksimkim005/transaction-analisys:latest
               docker stack deploy -c docker-compose-transaction-analisys.yaml stage
