@@ -41,18 +41,10 @@ jobs:
       needs: build-and-publish
       runs-on: ubuntu-latest
       steps:
-        - name: Check SSH secrets presence
-          run: |
-            if [ -z "${{ env.SSH_HOST_2 }}" ]; then echo "SSH_HOST_2 is empty"; exit 1; fi
-            if [ -z "${{ secrets.SSH_HOST }}" ]; then echo "SSH_HOST is empty"; fi
-            if [ -z "${{ secrets.SSH_USER }}" ]; then echo "SSH_USER is empty"; exit 1; fi
-            if [ -z "${{ secrets.SSH_KEY }}" ]; then echo "SSH_KEY is empty"; exit 1; fi
-            echo "OK"
-
         - name: Deploy on Swarm manager via SSH
           uses: appleboy/ssh-action@v1.1.0
           with:
-            host: ${{ secrets.SSH_HOST || env.SSH_HOST_2 }}
+            host: ${{ secrets.SSH_HOST || vars.SSH_HOST_2 }}
             username: ${{ secrets.SSH_USER }}
             key: ${{ secrets.SSH_KEY }}
             port: 22
