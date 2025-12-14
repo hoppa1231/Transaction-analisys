@@ -29,10 +29,12 @@ const colors_svg = ["#005757", "#038C7F", "#5ab8a6", "#ebccae", "#898c94"];
 const sectionCount = colors.length;
 
 function resizeChartToContainer() {
+  const container_size = document.querySelector(".central-widget");
   const container = document.querySelector(".chart-pie");
-  const maxSize = 380;
+  const maxSize = 300;
   const minSize = 180;
-  const containerWidth = container ? container.getBoundingClientRect().width : maxSize;
+  console.log(container_size.getBoundingClientRect().width);
+  const containerWidth = container ? container_size.getBoundingClientRect().width-100 : maxSize;
   let size = Math.max(minSize, Math.min(maxSize, containerWidth));
   const dpr = window.devicePixelRatio || 1;
 
