@@ -47,6 +47,7 @@ jobs:
             username: ${{ secrets.SSH_USER }}
             key: ${{ secrets.SSH_KEY }}
             port: ${{ secrets.SSH_PORT || 22 }}
+            passphrase: ${{ secrets.SSH_PASSPHRASE }}
             script: |
               cd /root/Swarm
               docker pull maksimkim005/transaction-analisys:latest
