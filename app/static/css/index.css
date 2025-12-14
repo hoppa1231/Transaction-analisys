@@ -33,30 +33,98 @@
 body {
     display: flex;
     justify-content: center;
-    align-items: center;
-    min-height: 100vh;            
+    align-items: flex-start;
+    min-height: 100vh;
+    padding-top: 48px;
+    padding-bottom: 32px;
     background-color: var(--color-background-page);
+}
+.offline-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px 12px;
+    text-align: center;
+    background-color: var(--color-nephritis);
+    color: var(--color-white);
+    font-size: 16px;
+    z-index: 1000;
+    box-shadow: 0 4px 12px #00000033;
 }
 .central-widget {
     display: flex;
-    width: 90%;
-    height: 80vh;
+    flex-wrap: wrap;
+    gap: 32px;
+    width: min(1200px, calc(90%));
+    min-height: 70vh;
     border-radius: 25px;
-    justify-content: space-around;
+    justify-content: center;
     align-items: stretch;
-    padding-top: 50px;
-    padding-bottom: 50px;
+    padding: clamp(16px, 2vw, 40px);
     background-color: var(--color-background-block);
 }
+.left-part, .right-part {
+    display: flex;
+    flex: 1 1 360px;
+    flex-direction: column;
+    gap: 20px;
+}
+.upload-card {
+    background: var(--color-white);
+    border-radius: 16px;
+    padding: 14px 16px;
+    box-shadow: 0 8px 24px #0000000f;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.upload-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-active);
+}
+.upload-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.upload-controls input[type="file"] {
+    flex: 1 1 200px;
+    font-size: 0.8rem;
+    max-width: 19rem;
+}
+.upload-btn {
+    background: var(--color-nephritis);
+    color: var(--color-white);
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+.upload-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.upload-status {
+    font-size: 14px;
+    min-height: 18px;
+    color: var(--color-not-active);
+}
+.upload-status.success { color: #0f9d58; }
+.upload-status.error { color: #b00020; }
 
 /* - - LIST - - */
 .list-operation-container {
     background-color: var(--color-white);
-    width: 600px;
     border-radius: 20px;
-    min-height: 100%;
+    flex: 1 1 380px;
+    min-height: 320px;
     max-height: 100%;
     overflow-y: auto;
+    box-shadow: 0 8px 24px #00000012;
 }
 .list-operation {
     display: flex;
@@ -68,23 +136,27 @@ body {
     display: flex;
     width: 100%; 
     list-style-type: none;
-    height: 30px;
     align-items: center;
-    gap: 25px;
+    gap: 18px;
     text-align: left;
-    padding: 25px;
-    margin-left: 25px;
-    margin-right: 25px;
-    margin-top: 10px;
+    padding: 6px 14px;
+    margin-left: 12px;
+    margin-right: 12px;
+    margin-top: 12px;
     color: var(--color-active);
 }
 .list-operation-item svg {
     background-color: var(--color-not-active-transperent);
     border-radius: 20%;
     stroke: var(--color-not-active);
-    width: 38px;
-    height: 38px;
-    padding: 5px;
+    width: 36px;
+    height: 36px;
+    padding: 4px;
+}
+.empty-state {
+    justify-content: center;
+    color: var(--color-not-active);
+    font-weight: 600;
 }
 .price {
     text-align: right;
@@ -94,6 +166,12 @@ body {
 /* - - -  - - - */
 
 /* - - BUTTON - - */
+.move-money {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    padding-left: 8px;
+}
 .move-money-btn {
     background-color: var(--color-background-block);
     border: none;
@@ -120,16 +198,20 @@ body {
 .chart {
     display: flex;
     align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 .chart-pie {
-    height: 400px;
-    width: 400px;
+    width: min(100%, 460px);
+    aspect-ratio: 1 / 1;
     text-align: center;
     align-content: center;    
+    display: grid;
+    place-items: center;
 }
 #colorRing-text {
-    position: relative;
-    top: -54%;
+    position: absolute;
+    font-size: 1.4rem;
     color: var(--color-not-active);
 
 }
@@ -145,8 +227,71 @@ body {
 .arrow-btn:hover svg {
     color: var(--color-active);
 }
+canvas {
+    width: 100%;
+    height: 100%;
+}
 /* - - - - - - - */
 
 .hidden {
     display: none !important;
+}
+
+@media (max-width: 1100px) {
+    body {
+        padding-top: 60px;
+    }
+    .central-widget {
+        flex-direction: column;
+        min-height: auto;
+        height: auto;
+    }
+    .list-operation-container {
+        max-height: 360px;
+    }
+    #sum {
+        margin-left: 12px;
+    }
+}
+
+@media (max-width: 720px) {
+    * {
+        font-size: 18px;
+    }
+    .central-widget {
+        gap: 20px;
+        width: calc(100% - 20px);
+    }
+    .list-operation-item {
+        margin-left: 8px;
+        margin-right: 8px;
+        padding: 14px 16px;
+        gap: 12px;
+    }
+    #sum {
+        font-size: 26px;
+        margin: 6px 16px;
+    }
+    .chart {
+        gap: 4px;
+    }
+}
+
+@media (max-width: 520px) {
+    body {
+        padding-top: 70px;
+    }
+    .list-operation-container {
+        min-height: 260px;
+        max-height: none;
+    }
+    .move-money-btn {
+        padding: 8px 14px;
+    }
+    .arrow-btn {
+        width: 28px;
+    }
+    #colorRing-text {
+        top: -48%;
+    }
 }

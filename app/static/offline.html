@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline | Transaction Analysis</title>
+    <style>
+        :root {
+            --bg: #111827;
+            --card: #1f2937;
+            --accent: #0f766e;
+            --text: #e5e7eb;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 20% 20%, #0f766e33, #111827 50%), #0f172a;
+            color: var(--text);
+            font-family: "Montserrat", Arial, sans-serif;
+        }
+        .card {
+            background: var(--card);
+            padding: 32px 28px;
+            border-radius: 16px;
+            box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+            max-width: 360px;
+            text-align: center;
+            border: 1px solid #0f766e44;
+        }
+        h1 { margin: 0 0 12px 0; font-size: 24px; }
+        p { margin: 8px 0; line-height: 1.4; color: #cbd5e1; }
+        .pill {
+            display: inline-block;
+            margin-top: 14px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: #0f766e22;
+            color: #6ee7b7;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Вы оффлайн</h1>
+        <p>Нет подключения к сети. Последние данные доступны, как только вернется интернет — приложение обновится автоматически.</p>
+        <span class="pill">PWA режим</span>
+    </div>
+</body>
+</html>

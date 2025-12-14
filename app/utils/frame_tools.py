@@ -15,7 +15,8 @@ def extract_english_words(text):
     return ' '.join(words) if words else None
 
 def load_buyInfo():
-    with open(BASE_DIR + '/data/base/type_buy.txt') as file:
+    # Explicit UTF-8 to avoid locale-dependent decode errors
+    with open(BASE_DIR + '/data/base/type_buy.txt', encoding='utf-8') as file:
         for line in file:
             organization, type, name = line.strip().split(':')
             type_buy[organization] = type
@@ -32,17 +33,44 @@ def save_buyInfo():
     for organization in organizations:
         type, name = type_buy[organization], name_buy[organization]
         text += organization+':'+type+':'+name+'\n'
-    with open(BASE_DIR + '/data/base/type_buy.txt', 'w') as file:
+    with open(BASE_DIR + '/data/base/type_buy.txt', 'w', encoding='utf-8') as file:
         file.write(text[:-1])
 
 def init_dataFrame():
     global df
     df = pd.read_csv(BASE_DIR + '/data/base/output.csv')
-    df = df.iloc[:, 1:]
-    df['price'] = df['price'].astype(float)
-    df['datetime'] = pd.to_datetime(df['datetime'], format='%d.%m.%Y %H:%M', errors='coerce')
-    
-    df[['operation', 'type', 'describe']] = df['operation'].apply(lambda x: pd.Series(typizer(x)))
+    # Drop legacy index column if present
+    if df.columns[0].startswith('Unnamed'):
+        df = df.iloc[:, 1:]
+
+    required_cols = {'operation', 'datetime', 'price'}
+    missing = required_cols - set(df.columns)
+    if missing:
+        raise ValueError(f"Отсутствуют колонки: {', '.join(missing)}")
+
+    df['price'] = pd.to_numeric(df['price'], errors='coerce')
+    df['datetime'] = pd.to_datetime(df['datetime'], format='%d.%m.%Y %H:%M', errors='coerce', dayfirst=True)
+    df['operation'] = df['operation'].astype(str)
+
+    if len(df):
+        def safe_typizer(op):
+            try:
+                res = typizer(str(op))
+                if not isinstance(res, (list, tuple)):
+                    return (str(res), 'none', '')
+                if len(res) == 3:
+                    return tuple(res)
+                if len(res) > 3:
+                    return tuple(res[:3])
+                return tuple(list(res) + [''] * (3 - len(res)))
+            except Exception:
+                return (str(op), 'none', '')
+
+        df[['operation', 'type', 'describe']] = df['operation'].apply(lambda x: pd.Series(safe_typizer(x)))
+    else:
+        df['type'] = []
+        df['describe'] = []
+    df = df.dropna(subset=['price', 'datetime'])
 
 def init_csv():
     try:
@@ -58,6 +86,12 @@ def init_csv():
         
     except Exception as e:
         print("[ERROR]", e)
+
+
+def refresh_data_from_pdf(filename, input_path=None):
+    """Rebuild CSV and dataframe from a freshly uploaded PDF."""
+    pdf_to_csv(filename=filename, input_path=input_path)
+    init_dataFrame()
 
 
 def find_info(name):
@@ -115,7 +149,12 @@ def filter_price(start_date=None, end_date=None, sign='+'):
         (df['datetime'] <= pd.to_datetime(end_date))
     ]
     filtered_df = filtered_df.sort_values(by='price', key=lambda x: x.abs(), ascending=False)
+
+    if not filtered_df.empty:
+        filtered_df = filtered_df.copy()
+        filtered_df['datetime'] = filtered_df['datetime'].dt.strftime('%Y-%m-%d %H:%M')
+    total = float(filtered_df['price'].sum()) if not filtered_df.empty else 0.0
     
-    return filtered_df.to_dict(orient='records'), filtered_df['price'].sum()
+    return filtered_df.to_dict(orient='records'), total
 
 init_csv()
